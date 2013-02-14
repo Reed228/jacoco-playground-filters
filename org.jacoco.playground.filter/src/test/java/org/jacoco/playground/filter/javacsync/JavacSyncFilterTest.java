@@ -22,18 +22,13 @@ import org.objectweb.asm.Opcodes;
 public class JavacSyncFilterTest extends FilterTestBase {
 
 	@Override
-	protected Class<?> getTarget() {
-		return Target.class;
-	}
-
-	@Override
 	protected IFilter getFilter() {
 		return new JavacSyncFilter();
 	}
 
 	@Test
 	public void sync() throws IOException {
-		applyFilterTo("sync", "()V");
+		applyFilterTo(Target.class, "sync", "()V");
 
 		assertOptionalFilteredInsn(Opcodes.ASTORE); // JDK Only
 		assertFilteredInsn(Opcodes.ALOAD);
@@ -46,7 +41,7 @@ public class JavacSyncFilterTest extends FilterTestBase {
 
 	@Test
 	public void syncWithReturn() throws IOException {
-		applyFilterTo("syncWithReturn", "()V");
+		applyFilterTo(Target.class, "syncWithReturn", "()V");
 
 		assertOptionalFilteredInsn(Opcodes.ASTORE); // JDK Only
 		assertFilteredInsn(Opcodes.ALOAD);
@@ -59,7 +54,7 @@ public class JavacSyncFilterTest extends FilterTestBase {
 
 	@Test
 	public void syncNested() throws IOException {
-		applyFilterTo("syncNested", "()V");
+		applyFilterTo(Target.class, "syncNested", "()V");
 
 		assertOptionalFilteredInsn(Opcodes.ASTORE); // JDK Only
 		assertFilteredInsn(Opcodes.ALOAD);
@@ -78,14 +73,14 @@ public class JavacSyncFilterTest extends FilterTestBase {
 
 	@Test
 	public void negativCatch() throws IOException {
-		applyFilterTo("negativCatch", "()V");
+		applyFilterTo(Target.class, "negativCatch", "()V");
 
 		assertNoMoreFilteredInsn();
 	}
 
 	@Test
 	public void negativFinally() throws IOException {
-		applyFilterTo("negativFinally", "()V");
+		applyFilterTo(Target.class, "negativFinally", "()V");
 
 		assertNoMoreFilteredInsn();
 	}

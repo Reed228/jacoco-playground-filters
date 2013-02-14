@@ -12,14 +12,12 @@
 package org.jacoco.playground.filter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import org.junit.Before;
 import org.objectweb.asm.ClassReader;
@@ -32,15 +30,20 @@ import org.objectweb.asm.tree.MethodNode;
  */
 public abstract class FilterTestBase {
 
-	private Map<String, MethodNode> methods;
-
 	private IFilter filter;
 
 	private LinkedList<AbstractInsnNode> filtered;
 
 	@Before
 	public void setup() throws IOException {
-		final Class<?> target = getTarget();
+		filter = getFilter();
+		filtered = new LinkedList<AbstractInsnNode>();
+	}
+
+	protected abstract IFilter getFilter();
+
+	protected final MethodNode getMethod(Class<?> target, String name,
+			String desc) throws IOException {
 		final String resource = "/" + target.getName().replace('.', '/')
 				+ ".class";
 		ClassNode node = new ClassNode();
@@ -48,28 +51,20 @@ public abstract class FilterTestBase {
 		new ClassReader(in).accept(node, ClassReader.EXPAND_FRAMES);
 		in.close();
 
-		methods = new HashMap<String, MethodNode>();
 		for (Object m : node.methods) {
 			MethodNode method = (MethodNode) m;
-			methods.put(method.name + '#' + method.desc, method);
+			if (name.equals(method.name) && desc.equals(method.desc)) {
+				return method;
+			}
 		}
 
-		filter = getFilter();
-		filtered = new LinkedList<AbstractInsnNode>();
+		fail(String.format("Method %s%s not found.", name, desc));
+		return null;
 	}
 
-	protected abstract Class<?> getTarget();
-
-	protected abstract IFilter getFilter();
-
-	protected final MethodNode getMethod(String name, String desc) {
-		MethodNode method = methods.get(name + '#' + desc);
-		assertNotNull(method);
-		return method;
-	}
-
-	protected final void applyFilterTo(String name, String desc) {
-		final MethodNode method = getMethod(name, desc);
+	protected final void applyFilterTo(Class<?> target, String name, String desc)
+			throws IOException {
+		final MethodNode method = getMethod(target, name, desc);
 		filter.filter(method, new IFilterOutput() {
 
 			public void ignore(InsnSequence sequence) {
