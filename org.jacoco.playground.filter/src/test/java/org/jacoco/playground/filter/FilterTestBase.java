@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 /**
@@ -93,6 +94,15 @@ public abstract class FilterTestBase {
 		if (!filtered.isEmpty() && filtered.get(0).getOpcode() == opcode) {
 			filtered.removeFirst();
 		}
+	}
+
+	protected void assertFilteredMethodInsn(int opcode, String owner,
+			String name, String desc) {
+		final MethodInsnNode node = (MethodInsnNode) filtered.removeFirst();
+		assertEquals(opcode, node.getOpcode());
+		assertEquals(owner, node.owner);
+		assertEquals(name, node.name);
+		assertEquals(desc, node.desc);
 	}
 
 	protected void assertNoMoreFilteredInsn() {

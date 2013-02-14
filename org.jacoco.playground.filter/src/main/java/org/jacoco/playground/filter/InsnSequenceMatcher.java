@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
  * Matcher for instruction sequences.
@@ -24,11 +25,12 @@ public class InsnSequenceMatcher {
 
 	private boolean ignoreLines;
 	private boolean ignoreLabels;
-	private int[] opcodes;
+	private final List<INodeMatcher> nodeMatchers;
 
 	public InsnSequenceMatcher() {
 		ignoreLines = false;
 		ignoreLabels = false;
+		nodeMatchers = new ArrayList<INodeMatcher>();
 	}
 
 	// === configuration methods ===
@@ -56,7 +58,20 @@ public class InsnSequenceMatcher {
 	 *            opcodes of the sequence
 	 */
 	public InsnSequenceMatcher insn(int... opcodes) {
-		this.opcodes = opcodes;
+		for (int opcode : opcodes) {
+			nodeMatchers.add(new OpcodeMatcher(opcode));
+		}
+		return this;
+	}
+
+	/**
+	 * Adds a method instruction to the expected sequence.
+	 * 
+	 * @param opcodes
+	 *            opcodes of the sequence
+	 */
+	public InsnSequenceMatcher method(int opcode, String name, String desc) {
+		nodeMatchers.add(new MethodMatcher(opcode, name, desc));
 		return this;
 	}
 
@@ -72,11 +87,11 @@ public class InsnSequenceMatcher {
 	public InsnSequence matchForward(final AbstractInsnNode start) {
 		AbstractInsnNode node = skipIgnoredForward(start);
 		List<AbstractInsnNode> match = new ArrayList<AbstractInsnNode>();
-		for (int opcode : opcodes) {
+		for (INodeMatcher m : nodeMatchers) {
 			if (node == null) {
 				return null;
 			}
-			if (node.getOpcode() != opcode) {
+			if (!m.matches(node)) {
 				return null;
 			}
 			match.add(node);
@@ -95,11 +110,11 @@ public class InsnSequenceMatcher {
 	public InsnSequence matchBackward(AbstractInsnNode start) {
 		AbstractInsnNode node = skipIgnoredBackward(start);
 		List<AbstractInsnNode> match = new ArrayList<AbstractInsnNode>();
-		for (int i = opcodes.length; --i >= 0;) {
+		for (int i = nodeMatchers.size(); --i >= 0;) {
 			if (node == null) {
 				return null;
 			}
-			if (node.getOpcode() != opcodes[i]) {
+			if (!nodeMatchers.get(i).matches(node)) {
 				return null;
 			}
 			match.add(node);
@@ -141,6 +156,49 @@ public class InsnSequenceMatcher {
 			return getPrevious(node);
 		}
 		return node;
+	}
+
+	private interface INodeMatcher {
+		boolean matches(AbstractInsnNode node);
+	}
+
+	private static class OpcodeMatcher implements INodeMatcher {
+
+		private final int opcode;
+
+		OpcodeMatcher(int opcode) {
+			this.opcode = opcode;
+		}
+
+		public boolean matches(AbstractInsnNode node) {
+			return opcode == node.getOpcode();
+		}
+
+	}
+
+	private static class MethodMatcher extends OpcodeMatcher {
+
+		private final String name;
+		private final String desc;
+
+		MethodMatcher(int opcode, String name, String desc) {
+			super(opcode);
+			this.name = name;
+			this.desc = desc;
+		}
+
+		@Override
+		public boolean matches(AbstractInsnNode node) {
+			if (!super.matches(node)) {
+				return false;
+			}
+			if (!(node instanceof MethodInsnNode)) {
+				return false;
+			}
+			MethodInsnNode method = (MethodInsnNode) node;
+			return name.equals(method.name) && desc.equals(method.desc);
+		}
+
 	}
 
 }
