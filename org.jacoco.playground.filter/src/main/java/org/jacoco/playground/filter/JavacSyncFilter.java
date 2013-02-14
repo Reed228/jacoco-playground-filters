@@ -16,8 +16,8 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 
 /**
- * Filter for filtering the exception path created by the Java compiler for the
- * Java synchronized statement.
+ * Filter for the exception path created by the Java compiler for the
+ * synchronized statement.
  */
 public class JavacSyncFilter implements IFilter {
 
@@ -41,36 +41,37 @@ public class JavacSyncFilter implements IFilter {
 
 	public void filter(MethodNode method, IFilterOutput output) {
 		for (Object n : method.tryCatchBlocks) {
-			TryCatchBlockNode tryCatch = (TryCatchBlockNode) n;
-
-			// Only catch blocks of type any:
-			if (tryCatch.type != null) {
-				continue;
-			}
-			// Skip "safety handler" which protects the exit statement itself:
-			if (tryCatch.start == tryCatch.handler) {
-				continue;
-			}
-
-			final InsnSequence normalPath = NORMAL_PATH
-					.matchBackward(tryCatch.end);
-			if (normalPath == null) {
-				continue;
-			}
-
-			InsnSequence exceptionPath = EXCEPTION_PATH_JDK
-					.matchForward(tryCatch.handler);
-			if (exceptionPath == null) {
-				exceptionPath = EXCEPTION_PATH_ECJ
-						.matchForward(tryCatch.handler);
-			}
-
-			if (exceptionPath == null) {
-				continue;
-			}
-
-			output.ignore(exceptionPath);
+			filter((TryCatchBlockNode) n, output);
 		}
+	}
+
+	private void filter(TryCatchBlockNode tryCatch, IFilterOutput output) {
+
+		// Only catch blocks of type any:
+		if (tryCatch.type != null) {
+			return;
+		}
+
+		// Skip "safety handler" which protects the exit statement itself:
+		if (tryCatch.start == tryCatch.handler) {
+			return;
+		}
+
+		if (NORMAL_PATH.matchBackward(tryCatch.end) == null) {
+			return;
+		}
+
+		InsnSequence exceptionPath = EXCEPTION_PATH_JDK
+				.matchForward(tryCatch.handler);
+		if (exceptionPath == null) {
+			exceptionPath = EXCEPTION_PATH_ECJ.matchForward(tryCatch.handler);
+		}
+
+		if (exceptionPath == null) {
+			return;
+		}
+
+		output.ignore(exceptionPath);
 	}
 
 }
