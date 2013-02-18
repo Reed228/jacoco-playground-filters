@@ -68,9 +68,11 @@ public abstract class FilterTestBase {
 		final MethodNode method = getMethod(target, name, desc);
 		filter.filter(method, new IFilterOutput() {
 
-			public void ignore(InsnSequence sequence) {
-				for (AbstractInsnNode insn : sequence.getInstructions()) {
-					ignore(insn);
+			public void ignore(InsnSubList list) {
+				for (AbstractInsnNode insn : list) {
+					if (insn.getOpcode() != -1) {
+						ignore(insn);
+					}
 				}
 			}
 

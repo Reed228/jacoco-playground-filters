@@ -12,7 +12,6 @@
 package org.jacoco.playground.filter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -84,9 +83,10 @@ public class InsnSequenceMatcher {
 	 *            first node to match
 	 * @return match or <code>null</code>
 	 */
-	public InsnSequence matchForward(final AbstractInsnNode start) {
+	public InsnSubList matchForward(final AbstractInsnNode start) {
 		AbstractInsnNode node = skipIgnoredForward(start);
-		List<AbstractInsnNode> match = new ArrayList<AbstractInsnNode>();
+		AbstractInsnNode first = node;
+		AbstractInsnNode last = node;
 		for (INodeMatcher m : nodeMatchers) {
 			if (node == null) {
 				return null;
@@ -94,10 +94,10 @@ public class InsnSequenceMatcher {
 			if (!m.matches(node)) {
 				return null;
 			}
-			match.add(node);
+			last = node;
 			node = getNext(node);
 		}
-		return new InsnSequence(match);
+		return new InsnSubList(first, last);
 	}
 
 	/**
@@ -107,9 +107,10 @@ public class InsnSequenceMatcher {
 	 *            first node to match
 	 * @return match or <code>null</code>
 	 */
-	public InsnSequence matchBackward(AbstractInsnNode start) {
+	public InsnSubList matchBackward(AbstractInsnNode start) {
 		AbstractInsnNode node = skipIgnoredBackward(start);
-		List<AbstractInsnNode> match = new ArrayList<AbstractInsnNode>();
+		AbstractInsnNode first = node;
+		AbstractInsnNode last = node;
 		for (int i = nodeMatchers.size(); --i >= 0;) {
 			if (node == null) {
 				return null;
@@ -117,11 +118,10 @@ public class InsnSequenceMatcher {
 			if (!nodeMatchers.get(i).matches(node)) {
 				return null;
 			}
-			match.add(node);
+			first = node;
 			node = getPrevious(node);
 		}
-		Collections.reverse(match);
-		return new InsnSequence(match);
+		return new InsnSubList(first, last);
 	}
 
 	private AbstractInsnNode getNext(final AbstractInsnNode node) {

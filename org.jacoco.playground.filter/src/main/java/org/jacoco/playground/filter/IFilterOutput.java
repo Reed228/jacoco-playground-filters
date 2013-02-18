@@ -20,7 +20,7 @@ public interface IFilterOutput {
 
 	void ignore(AbstractInsnNode node);
 
-	void ignore(InsnSequence sequence);
+	void ignore(InsnSubList list);
 
 	void map(AbstractInsnNode fromNode, AbstractInsnNode toNode);
 

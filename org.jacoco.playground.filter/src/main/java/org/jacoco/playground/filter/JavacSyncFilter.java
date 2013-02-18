@@ -61,7 +61,7 @@ public class JavacSyncFilter implements IFilter {
 			return;
 		}
 
-		InsnSequence exceptionPath = EXCEPTION_PATH_JDK
+		InsnSubList exceptionPath = EXCEPTION_PATH_JDK
 				.matchForward(tryCatch.handler);
 		if (exceptionPath == null) {
 			exceptionPath = EXCEPTION_PATH_ECJ.matchForward(tryCatch.handler);

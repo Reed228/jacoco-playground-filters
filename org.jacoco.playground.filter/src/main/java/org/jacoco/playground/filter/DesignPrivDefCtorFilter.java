@@ -30,8 +30,8 @@ public class DesignPrivDefCtorFilter implements IFilter {
 		if (isConstructor(method) && isPrivate(method)
 				&& hasNoArguments(method)) {
 
-			InsnSequence superCall = SUPER_CALL
-					.matchForward(method.instructions.getFirst());
+			InsnSubList superCall = SUPER_CALL.matchForward(method.instructions
+					.getFirst());
 
 			if (superCall != null) {
 				output.ignore(superCall);
