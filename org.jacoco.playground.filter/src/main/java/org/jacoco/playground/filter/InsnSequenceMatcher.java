@@ -192,7 +192,7 @@ public class InsnSequenceMatcher {
 			if (!super.matches(node)) {
 				return false;
 			}
-			if (!(node instanceof MethodInsnNode)) {
+			if (node.getType() != AbstractInsnNode.METHOD_INSN) {
 				return false;
 			}
 			MethodInsnNode method = (MethodInsnNode) node;
