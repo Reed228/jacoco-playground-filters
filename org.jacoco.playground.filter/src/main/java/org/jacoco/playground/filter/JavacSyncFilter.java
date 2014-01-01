@@ -57,7 +57,8 @@ public class JavacSyncFilter implements IFilter {
 			return;
 		}
 
-		if (NORMAL_PATH.matchBackward(tryCatch.end) == null) {
+		final InsnSubList normalPath = NORMAL_PATH.matchBackward(tryCatch.end);
+		if (normalPath == null) {
 			return;
 		}
 
@@ -70,6 +71,8 @@ public class JavacSyncFilter implements IFilter {
 		if (exceptionPath == null) {
 			return;
 		}
+
+		// TODO: Map to normal path
 
 		output.ignore(exceptionPath);
 	}

@@ -12,18 +12,13 @@
 package org.jacoco.playground.filter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.Before;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 /**
@@ -31,41 +26,21 @@ import org.objectweb.asm.tree.MethodNode;
  */
 public abstract class FilterTestBase {
 
+	protected TargetMethod target;
+
 	private IFilter filter;
 
-	private LinkedList<AbstractInsnNode> filtered;
+	private Set<Integer> filtered;
 
 	@Before
 	public void setup() throws IOException {
 		filter = getFilter();
-		filtered = new LinkedList<AbstractInsnNode>();
+		filtered = new TreeSet<Integer>();
 	}
 
 	protected abstract IFilter getFilter();
 
-	protected final MethodNode getMethod(Class<?> target, String name,
-			String desc) throws IOException {
-		final String resource = "/" + target.getName().replace('.', '/')
-				+ ".class";
-		ClassNode node = new ClassNode();
-		InputStream in = target.getResourceAsStream(resource);
-		new ClassReader(in).accept(node, ClassReader.EXPAND_FRAMES);
-		in.close();
-
-		for (Object m : node.methods) {
-			MethodNode method = (MethodNode) m;
-			if (name.equals(method.name) && desc.equals(method.desc)) {
-				return method;
-			}
-		}
-
-		fail(String.format("Method %s%s not found.", name, desc));
-		return null;
-	}
-
-	protected final void applyFilterTo(Class<?> target, String name, String desc)
-			throws IOException {
-		final MethodNode method = getMethod(target, name, desc);
+	protected final void applyFilterTo(MethodNode method) throws IOException {
 		filter.filter(method, new IFilterOutput() {
 
 			public void ignore(InsnSubList list) {
@@ -77,7 +52,7 @@ public abstract class FilterTestBase {
 			}
 
 			public void ignore(AbstractInsnNode node) {
-				filtered.add(node);
+				filtered.add(target.getLabelOf(node));
 			}
 
 			public void map(AbstractInsnNode fromNode, AbstractInsnNode toNode) {
@@ -87,34 +62,12 @@ public abstract class FilterTestBase {
 		});
 	}
 
-	protected AbstractInsnNode assertFilteredInsn(int opcode) {
-		final AbstractInsnNode node = filtered.removeFirst();
-		assertEquals(opcode, node.getOpcode());
-		return node;
-	}
-
-	protected void assertOptionalFilteredInsn(int opcode) {
-		if (!filtered.isEmpty() && filtered.get(0).getOpcode() == opcode) {
-			filtered.removeFirst();
+	protected void assertFiltered(int... instructions) {
+		final Set<Integer> expected = new TreeSet<Integer>();
+		for (int i : instructions) {
+			expected.add(Integer.valueOf(i));
 		}
-	}
-
-	protected MethodInsnNode assertFilteredMethodInsn(int opcode, String name) {
-		final MethodInsnNode node = (MethodInsnNode) assertFilteredInsn(opcode);
-		assertEquals(name, node.name);
-		return node;
-	}
-
-	protected MethodInsnNode assertFilteredMethodInsn(int opcode, String owner,
-			String name, String desc) {
-		final MethodInsnNode node = assertFilteredMethodInsn(opcode, name);
-		assertEquals(owner, node.owner);
-		assertEquals(desc, node.desc);
-		return node;
-	}
-
-	protected void assertNoMoreFilteredInsn() {
-		assertEquals(Collections.emptyList(), filtered);
+		assertEquals(expected, filtered);
 	}
 
 }
