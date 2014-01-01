@@ -87,9 +87,10 @@ public abstract class FilterTestBase {
 		});
 	}
 
-	protected void assertFilteredInsn(int opcode) {
+	protected AbstractInsnNode assertFilteredInsn(int opcode) {
 		final AbstractInsnNode node = filtered.removeFirst();
 		assertEquals(opcode, node.getOpcode());
+		return node;
 	}
 
 	protected void assertOptionalFilteredInsn(int opcode) {
@@ -98,13 +99,18 @@ public abstract class FilterTestBase {
 		}
 	}
 
-	protected void assertFilteredMethodInsn(int opcode, String owner,
-			String name, String desc) {
-		final MethodInsnNode node = (MethodInsnNode) filtered.removeFirst();
-		assertEquals(opcode, node.getOpcode());
-		assertEquals(owner, node.owner);
+	protected MethodInsnNode assertFilteredMethodInsn(int opcode, String name) {
+		final MethodInsnNode node = (MethodInsnNode) assertFilteredInsn(opcode);
 		assertEquals(name, node.name);
+		return node;
+	}
+
+	protected MethodInsnNode assertFilteredMethodInsn(int opcode, String owner,
+			String name, String desc) {
+		final MethodInsnNode node = assertFilteredMethodInsn(opcode, name);
+		assertEquals(owner, node.owner);
 		assertEquals(desc, node.desc);
+		return node;
 	}
 
 	protected void assertNoMoreFilteredInsn() {
