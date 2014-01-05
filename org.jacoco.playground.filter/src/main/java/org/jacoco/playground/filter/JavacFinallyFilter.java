@@ -30,8 +30,6 @@ import org.objectweb.asm.tree.VarInsnNode;
 public class JavacFinallyFilter implements IFilter {
 
 	private static final InsnSequenceMatcher ANY_START = new InsnSequenceMatcher()
-			.ignoreLabels() //
-			.ignoreLines() //
 			.insn(Opcodes.ASTORE);
 
 	public void filter(MethodNode method, IFilterOutput output) {

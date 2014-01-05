@@ -22,33 +22,13 @@ import org.objectweb.asm.tree.MethodInsnNode;
  */
 public class InsnSequenceMatcher {
 
-	private boolean ignoreLines;
-	private boolean ignoreLabels;
 	private final List<INodeMatcher> nodeMatchers;
 
 	public InsnSequenceMatcher() {
-		ignoreLines = false;
-		ignoreLabels = false;
 		nodeMatchers = new ArrayList<INodeMatcher>();
 	}
 
 	// === configuration methods ===
-
-	/**
-	 * Specifies that lines should be ignored.
-	 */
-	public InsnSequenceMatcher ignoreLines() {
-		this.ignoreLines = true;
-		return this;
-	}
-
-	/**
-	 * Specifies that labels should be ignored.
-	 */
-	public InsnSequenceMatcher ignoreLabels() {
-		this.ignoreLabels = true;
-		return this;
-	}
 
 	/**
 	 * Adds instructions with the given opcode to the expected sequence.
@@ -132,10 +112,7 @@ public class InsnSequenceMatcher {
 		if (node == null) {
 			return null;
 		}
-		if (ignoreLabels && node.getType() == AbstractInsnNode.LABEL) {
-			return getNext(node);
-		}
-		if (ignoreLines && node.getType() == AbstractInsnNode.LINE) {
+		if (isIgnored(node)) {
 			return getNext(node);
 		}
 		return node;
@@ -149,13 +126,20 @@ public class InsnSequenceMatcher {
 		if (node == null) {
 			return null;
 		}
-		if (ignoreLabels && node.getType() == AbstractInsnNode.LABEL) {
-			return getPrevious(node);
-		}
-		if (ignoreLines && node.getType() == AbstractInsnNode.LINE) {
+		if (isIgnored(node)) {
 			return getPrevious(node);
 		}
 		return node;
+	}
+
+	private boolean isIgnored(AbstractInsnNode node) {
+		switch (node.getType()) {
+		case AbstractInsnNode.LABEL:
+		case AbstractInsnNode.LINE:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	private interface INodeMatcher {

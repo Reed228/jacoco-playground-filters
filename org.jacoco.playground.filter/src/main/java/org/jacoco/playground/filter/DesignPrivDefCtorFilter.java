@@ -20,8 +20,6 @@ import org.objectweb.asm.tree.MethodNode;
 public class DesignPrivDefCtorFilter implements IFilter {
 
 	private static final InsnSequenceMatcher SUPER_CALL = new InsnSequenceMatcher()
-			.ignoreLabels() //
-			.ignoreLines() //
 			.insn(Opcodes.ALOAD) //
 			.method(Opcodes.INVOKESPECIAL, "<init>", "()V") //
 			.insn(Opcodes.RETURN);

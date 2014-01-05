@@ -22,20 +22,14 @@ import org.objectweb.asm.tree.TryCatchBlockNode;
 public class JavacSyncFilter implements IFilter {
 
 	private static final InsnSequenceMatcher NORMAL_PATH = new InsnSequenceMatcher()
-			.ignoreLabels() //
-			.ignoreLines() //
 			.insn(Opcodes.ALOAD, Opcodes.MONITOREXIT);
 
 	// ECJ keeps the exception on the stack
 	private static final InsnSequenceMatcher EXCEPTION_PATH_ECJ = new InsnSequenceMatcher()
-			.ignoreLabels() //
-			.ignoreLines() //
 			.insn(Opcodes.ALOAD, Opcodes.MONITOREXIT, Opcodes.ATHROW);
 
 	// JDK store the exception in a local
 	private static final InsnSequenceMatcher EXCEPTION_PATH_JDK = new InsnSequenceMatcher()
-			.ignoreLabels() //
-			.ignoreLines() //
 			.insn(Opcodes.ASTORE, Opcodes.ALOAD, Opcodes.MONITOREXIT,
 					Opcodes.ALOAD, Opcodes.ATHROW);
 
