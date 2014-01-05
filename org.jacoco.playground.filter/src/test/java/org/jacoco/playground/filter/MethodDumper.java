@@ -168,6 +168,13 @@ public class MethodDumper {
 			prependLabel();
 		}
 
+		@Override
+		public void visitFieldInsn(int opcode, String owner, String name,
+				String desc) {
+			super.visitFieldInsn(opcode, owner, name, desc);
+			prependLabel();
+		}
+
 		private void prependLabel() {
 			final String l = (String) labelNames.get(currentLabel);
 			setLinePrefix("L(" + l + ").");
@@ -186,8 +193,8 @@ public class MethodDumper {
 
 	public static void main(String[] args) throws IOException {
 		MethodNode method = getMethod(
-				"./target/test-classes/org/jacoco/playground/filter/javacfinally/Target.class",
-				"nested", "()V");
+				"./target/test-classes/org/jacoco/playground/filter/Target.class",
+				"negativFinally", "()V");
 		dump(method);
 	}
 

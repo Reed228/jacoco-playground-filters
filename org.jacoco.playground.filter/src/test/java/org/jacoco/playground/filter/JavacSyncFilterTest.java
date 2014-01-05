@@ -35,7 +35,7 @@ public class JavacSyncFilterTest extends FilterTestBase {
 
 	/**
 	 * <pre>
-	 * public void sync() {
+	 * void sync() {
 	 * 	synchronized (lock) {
 	 * 		doit();
 	 * 	}
@@ -43,40 +43,77 @@ public class JavacSyncFilterTest extends FilterTestBase {
 	 * </pre>
 	 */
 	@Test
-	public void sync() throws IOException {
-		target = new TargetMethod(0, "run", "()V") {
+	public void syncECJ() throws IOException {
+		target = new TargetMethod(0, "sync", "()V") {
 			{
-				visitTryCatchBlock(6, 10, 11, null);
-				visitTryCatchBlock(11, 14, 11, null);
-
-				L(1).visitVarInsn(ALOAD, 0);
-				L(2).visitFieldInsn(GETFIELD, "Foo", "lock",
+				visitTryCatchBlock(5, 9, 10, null);
+				visitTryCatchBlock(10, 12, 10, null);
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitFieldInsn(GETFIELD, "Target", "lock",
 						"Ljava/lang/Object;");
-				L(3).visitInsn(DUP);
-				L(4).visitVarInsn(ASTORE, 1);
-				L(5).visitInsn(MONITORENTER);
-				L(6).visitVarInsn(ALOAD, 0);
-				L(7).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(8).visitVarInsn(ALOAD, 1);
-				L(9).visitInsn(MONITOREXIT);
-				L(10).visitJumpInsn(GOTO, 16);
-				L(11).visitVarInsn(ASTORE, 2);
-				L(12).visitVarInsn(ALOAD, 1);
-				L(13).visitInsn(MONITOREXIT);
-				L(14).visitVarInsn(ALOAD, 2);
-				L(15).visitInsn(ATHROW);
-				L(16).visitInsn(RETURN);
+				L(2).visitInsn(DUP);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitInsn(MONITORENTER);
+				L(5).visitVarInsn(ALOAD, 0);
+				L(6).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(7).visitVarInsn(ALOAD, 1);
+				L(8).visitInsn(MONITOREXIT);
+				L(9).visitJumpInsn(GOTO, 13);
+				L(10).visitVarInsn(ALOAD, 1);
+				L(11).visitInsn(MONITOREXIT);
+				L(12).visitInsn(ATHROW);
+				L(13).visitInsn(RETURN);
 			}
 		};
 
 		applyFilterTo(target);
 
-		assertFiltered(11, 12, 13, 14, 15);
+		assertFiltered(10, 11, 12);
 	}
 
 	/**
 	 * <pre>
-	 * public void syncWithReturn() {
+	 * void sync() {
+	 * 	synchronized (lock) {
+	 * 		doit();
+	 * 	}
+	 * }
+	 * </pre>
+	 */
+	@Test
+	public void syncJDK() throws IOException {
+		target = new TargetMethod(0, "sync", "()V") {
+			{
+				visitTryCatchBlock(5, 9, 10, null);
+				visitTryCatchBlock(10, 13, 10, null);
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitFieldInsn(GETFIELD, "Target", "lock",
+						"Ljava/lang/Object;");
+				L(2).visitInsn(DUP);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitInsn(MONITORENTER);
+				L(5).visitVarInsn(ALOAD, 0);
+				L(6).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(7).visitVarInsn(ALOAD, 1);
+				L(8).visitInsn(MONITOREXIT);
+				L(9).visitJumpInsn(GOTO, 15);
+				L(10).visitVarInsn(ASTORE, 2);
+				L(11).visitVarInsn(ALOAD, 1);
+				L(12).visitInsn(MONITOREXIT);
+				L(13).visitVarInsn(ALOAD, 2);
+				L(14).visitInsn(ATHROW);
+				L(15).visitInsn(RETURN);
+			}
+		};
+
+		applyFilterTo(target);
+
+		assertFiltered(10, 11, 12, 13, 14);
+	}
+
+	/**
+	 * <pre>
+	 * void syncWithReturn() {
 	 * 	synchronized (lock) {
 	 * 		doit();
 	 * 		return;
@@ -86,39 +123,35 @@ public class JavacSyncFilterTest extends FilterTestBase {
 	 */
 	@Test
 	public void syncWithReturnECJ() throws IOException {
-		target = new TargetMethod(0, "run", "()V") {
+		target = new TargetMethod(0, "syncWithReturn", "()V") {
 			{
-				visitTryCatchBlock(6, 10, 11, null);
-				visitTryCatchBlock(11, 14, 11, null);
-
-				L(1).visitVarInsn(ALOAD, 0);
-				L(2).visitFieldInsn(GETFIELD, "Foo", "lock",
+				visitTryCatchBlock(5, 9, 10, null);
+				visitTryCatchBlock(10, 12, 10, null);
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitFieldInsn(GETFIELD, "Target", "lock",
 						"Ljava/lang/Object;");
-				L(3).visitInsn(DUP);
-				L(4).visitVarInsn(ASTORE, 1);
-				L(5).visitInsn(MONITORENTER);
-				L(6).visitVarInsn(ALOAD, 0);
-				L(7).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(8).visitVarInsn(ALOAD, 1);
-				L(9).visitInsn(MONITOREXIT);
-				L(10).visitInsn(RETURN);
-
-				L(11).visitVarInsn(ASTORE, 2);
-				L(12).visitVarInsn(ALOAD, 1);
-				L(13).visitInsn(MONITOREXIT);
-				L(14).visitVarInsn(ALOAD, 2);
-				L(15).visitInsn(ATHROW);
+				L(2).visitInsn(DUP);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitInsn(MONITORENTER);
+				L(5).visitVarInsn(ALOAD, 0);
+				L(6).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(7).visitVarInsn(ALOAD, 1);
+				L(8).visitInsn(MONITOREXIT);
+				L(9).visitInsn(RETURN);
+				L(10).visitVarInsn(ALOAD, 1);
+				L(11).visitInsn(MONITOREXIT);
+				L(12).visitInsn(ATHROW);
 			}
 		};
 
 		applyFilterTo(target);
 
-		assertFiltered(11, 12, 13, 14, 15);
+		assertFiltered(10, 11, 12);
 	}
 
 	/**
 	 * <pre>
-	 * public void syncWithReturn() {
+	 * void syncWithReturn() {
 	 * 	synchronized (lock) {
 	 * 		doit();
 	 * 		return;
@@ -130,35 +163,37 @@ public class JavacSyncFilterTest extends FilterTestBase {
 	public void syncWithReturnJDK() throws IOException {
 		target = new TargetMethod(0, "run", "()V") {
 			{
-				visitTryCatchBlock(6, 10, 11, null);
-				visitTryCatchBlock(11, 13, 11, null);
-
-				L(1).visitVarInsn(ALOAD, 0);
-				L(2).visitFieldInsn(GETFIELD, "Foo", "lock",
+				visitTryCatchBlock(5, 9, 10, null);
+				visitTryCatchBlock(10, 13, 10, null);
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitFieldInsn(GETFIELD,
+						"org/jacoco/playground/filter/Target", "lock",
 						"Ljava/lang/Object;");
-				L(3).visitInsn(DUP);
-				L(4).visitVarInsn(ASTORE, 1);
-				L(5).visitInsn(MONITORENTER);
-				L(6).visitVarInsn(ALOAD, 0);
-				L(7).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(8).visitVarInsn(ALOAD, 1);
-				L(9).visitInsn(MONITOREXIT);
-				L(10).visitInsn(RETURN);
-
+				L(2).visitInsn(DUP);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitInsn(MONITORENTER);
+				L(5).visitVarInsn(ALOAD, 0);
+				L(6).visitMethodInsn(INVOKESPECIAL,
+						"org/jacoco/playground/filter/Target", "doit", "()V");
+				L(7).visitVarInsn(ALOAD, 1);
+				L(8).visitInsn(MONITOREXIT);
+				L(9).visitInsn(RETURN);
+				L(10).visitVarInsn(ASTORE, 2);
 				L(11).visitVarInsn(ALOAD, 1);
 				L(12).visitInsn(MONITOREXIT);
-				L(13).visitInsn(ATHROW);
+				L(13).visitVarInsn(ALOAD, 2);
+				L(14).visitInsn(ATHROW);
 			}
 		};
 
 		applyFilterTo(target);
 
-		assertFiltered(11, 12, 13);
+		assertFiltered(10, 11, 12, 13, 14);
 	}
 
 	/**
 	 * <pre>
-	 * public void syncNested() {
+	 * void syncNested() {
 	 * 	synchronized (lock1) {
 	 * 		doit();
 	 * 		synchronized (lock2) {
@@ -170,59 +205,60 @@ public class JavacSyncFilterTest extends FilterTestBase {
 	 * </pre>
 	 */
 	@Test
-	public void syncNested() throws IOException {
-		target = new TargetMethod(0, "run", "()V") {
+	public void syncNestedECJ() throws IOException {
+		target = new TargetMethod(0, "syncNested", "()V") {
 			{
-
-				visitTryCatchBlock(13, 17, 18, null);
-				visitTryCatchBlock(18, 20, 18, null);
-				visitTryCatchBlock(6, 25, 26, null);
-				visitTryCatchBlock(25, 28, 26, null);
-
-				L(1).visitVarInsn(ALOAD, 0);
-				L(2).visitFieldInsn(GETFIELD, "Foo", "lock1",
+				visitTryCatchBlock(12, 16, 17, null);
+				visitTryCatchBlock(17, 19, 17, null);
+				visitTryCatchBlock(5, 24, 25, null);
+				visitTryCatchBlock(25, 27, 25, null);
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitFieldInsn(GETFIELD,
+						"org/jacoco/playground/filter/Target", "lock1",
 						"Ljava/lang/Object;");
-				L(3).visitInsn(DUP);
-				L(4).visitVarInsn(ASTORE, 1);
-				L(5).visitInsn(MONITORENTER);
-				L(6).visitVarInsn(ALOAD, 0);
-				L(7).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(8).visitVarInsn(ALOAD, 0);
-				L(9).visitFieldInsn(GETFIELD, "Foo", "lock2",
+				L(2).visitInsn(DUP);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitInsn(MONITORENTER);
+				L(5).visitVarInsn(ALOAD, 0);
+				L(6).visitMethodInsn(INVOKESPECIAL,
+						"org/jacoco/playground/filter/Target", "doit", "()V");
+				L(7).visitVarInsn(ALOAD, 0);
+				L(8).visitFieldInsn(GETFIELD,
+						"org/jacoco/playground/filter/Target", "lock2",
 						"Ljava/lang/Object;");
-				L(10).visitInsn(DUP);
-				L(11).visitVarInsn(ASTORE, 2);
-				L(12).visitInsn(MONITORENTER);
-				L(13).visitVarInsn(ALOAD, 0);
-				L(14).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(15).visitVarInsn(ALOAD, 2);
-				L(16).visitInsn(MONITOREXIT);
-				L(17).visitJumpInsn(GOTO, 21);
-
-				L(18).visitVarInsn(ALOAD, 2);
-				L(19).visitInsn(MONITOREXIT);
-				L(20).visitInsn(ATHROW);
-
-				L(21).visitVarInsn(ALOAD, 0);
-				L(22).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(23).visitVarInsn(ALOAD, 1);
-				L(24).visitInsn(MONITOREXIT);
-				L(25).visitJumpInsn(GOTO, 28);
-				L(26).visitVarInsn(ALOAD, 1);
-				L(27).visitInsn(MONITOREXIT);
-				L(28).visitInsn(ATHROW);
-				L(29).visitInsn(RETURN);
+				L(9).visitInsn(DUP);
+				L(10).visitVarInsn(ASTORE, 2);
+				L(11).visitInsn(MONITORENTER);
+				L(12).visitVarInsn(ALOAD, 0);
+				L(13).visitMethodInsn(INVOKESPECIAL,
+						"org/jacoco/playground/filter/Target", "doit", "()V");
+				L(14).visitVarInsn(ALOAD, 2);
+				L(15).visitInsn(MONITOREXIT);
+				L(16).visitJumpInsn(GOTO, 20);
+				L(17).visitVarInsn(ALOAD, 2);
+				L(18).visitInsn(MONITOREXIT);
+				L(19).visitInsn(ATHROW);
+				L(20).visitVarInsn(ALOAD, 0);
+				L(21).visitMethodInsn(INVOKESPECIAL,
+						"org/jacoco/playground/filter/Target", "doit", "()V");
+				L(22).visitVarInsn(ALOAD, 1);
+				L(23).visitInsn(MONITOREXIT);
+				L(24).visitJumpInsn(GOTO, 28);
+				L(25).visitVarInsn(ALOAD, 1);
+				L(26).visitInsn(MONITOREXIT);
+				L(27).visitInsn(ATHROW);
+				L(28).visitInsn(RETURN);
 			}
 		};
 
 		applyFilterTo(target);
 
-		assertFiltered(18, 19, 20, 26, 27, 28);
+		assertFiltered(17, 18, 19, 25, 26, 27);
 	}
 
 	/**
 	 * <pre>
-	 * public void negativCatch() {
+	 * void negativCatch() {
 	 * 	try {
 	 * 		doit();
 	 * 	} catch (UnsupportedOperationException ex) {
@@ -233,18 +269,16 @@ public class JavacSyncFilterTest extends FilterTestBase {
 	 */
 	@Test
 	public void negativCatch() throws IOException {
-		target = new TargetMethod(0, "run", "()V") {
+		target = new TargetMethod(0, "negativCatch", "()V") {
 			{
-				visitTryCatchBlock(1, 3, 4,
-						"java/lang/UnsupportedOperationException");
-
-				L(1).visitVarInsn(ALOAD, 0);
-				L(2).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(3).visitJumpInsn(GOTO, 7);
-				L(4).visitVarInsn(ASTORE, 1);
-				L(5).visitVarInsn(ALOAD, 0);
-				L(6).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(7).visitInsn(RETURN);
+				visitTryCatchBlock(0, 2, 3, "java/lang/Exception");
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(2).visitJumpInsn(GOTO, 6);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitVarInsn(ALOAD, 0);
+				L(5).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(6).visitInsn(RETURN);
 			}
 		};
 
@@ -255,7 +289,7 @@ public class JavacSyncFilterTest extends FilterTestBase {
 
 	/**
 	 * <pre>
-	 * public void negativFinally() {
+	 * void negativFinally() {
 	 * 	try {
 	 * 		doit();
 	 * 	} finally {
@@ -266,21 +300,20 @@ public class JavacSyncFilterTest extends FilterTestBase {
 	 */
 	@Test
 	public void negativFinally() throws IOException {
-		target = new TargetMethod(0, "run", "()V") {
+		target = new TargetMethod(0, "negativFinally", "()V") {
 			{
-				visitTryCatchBlock(1, 4, 4, null);
-
-				L(1).visitVarInsn(ALOAD, 0);
-				L(2).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(3).visitJumpInsn(GOTO, 9);
-				L(4).visitVarInsn(ASTORE, 1);
-				L(5).visitVarInsn(ALOAD, 0);
-				L(6).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(7).visitVarInsn(ALOAD, 1);
-				L(8).visitInsn(ATHROW);
-				L(9).visitVarInsn(ALOAD, 0);
-				L(10).visitMethodInsn(INVOKESPECIAL, "Foo", "doit", "()V");
-				L(11).visitInsn(RETURN);
+				visitTryCatchBlock(0, 3, 3, null);
+				L(0).visitVarInsn(ALOAD, 0);
+				L(1).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(2).visitJumpInsn(GOTO, 8);
+				L(3).visitVarInsn(ASTORE, 1);
+				L(4).visitVarInsn(ALOAD, 0);
+				L(5).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(6).visitVarInsn(ALOAD, 1);
+				L(7).visitInsn(ATHROW);
+				L(8).visitVarInsn(ALOAD, 0);
+				L(9).visitMethodInsn(INVOKESPECIAL, "Target", "doit", "()V");
+				L(10).visitInsn(RETURN);
 			}
 		};
 
